@@ -322,9 +322,7 @@ main{max-width:900px;margin:0 auto;padding:20px 14px 60px;display:grid;gap:16px;
       <div class="dl-stitle">Workout Notes</div>
       <textarea class="notes-ta" id="dl-notes" placeholder="How did it feel? Any modifications or observations..."></textarea>
     </div>
-    <div class="dl-card" id="pt-card">
-      <div class="dl-stitle">&#129496; Daily PT Program</div>
-        <div class="dl-card">
+    <div class="dl-card">
       <div class="dl-stitle">&#129514; Macro Calculator</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Type an ingredient + quantity, hit Add. When done, push totals to your log.</div>
       <div class="macro-calc-row">
@@ -364,6 +362,8 @@ main{max-width:900px;margin:0 auto;padding:20px 14px 60px;display:grid;gap:16px;
         </div>
       </div>
     </div>
+    <div class="dl-card" id="pt-card">
+      <div class="dl-stitle">&#129496; Daily PT Program</div>
 
       <div class="pt-section">
         <div class="pt-section-title">1 &mdash; Warm-Up (5 min)</div>
@@ -1202,6 +1202,8 @@ const FOODS = {
   'caesar salad mix':     [170, 3,  8,  2,  14],
   'konjac glucomannan':   [200, 0, 83, 83,  0],
   'glucomannan':          [200, 0, 83, 83,  0],
+  // Custom entries
+  'my shake':             [435, 52.5, 37, 20, 12],
 };
 
 // Unit conversion to grams
