@@ -586,14 +586,28 @@ async function pushToSheets(){
 }
 async function pullFromSheets(){
   if(!SHEET_URL)return false;
-  setSyncStatus('syncing','Loading from Google Sheets...');
+  setSyncStatus('syncing','Connecting...');
   try{
-    const res=await fetch(SHEET_URL+'?action=read&key='+encodeURIComponent(SECRET_KEY),{redirect:'follow'});
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),10000);
+    let res;
+    try{
+      res=await fetch(SHEET_URL+'?action=read&key='+encodeURIComponent(SECRET_KEY),{redirect:'follow',signal:controller.signal});
+    }catch(fe){
+      clearTimeout(timeout);
+      if(fe.name==='AbortError'){
+        setSyncStatus('error','Timed out after 10s — check your Web App URL and that access is set to Anyone');
+      }else{
+        setSyncStatus('error','Network error: '+fe.message);
+      }
+      return false;
+    }
+    clearTimeout(timeout);
     const text=await res.text();
     let json;
     try{json=JSON.parse(text);}catch(pe){
-      setSyncStatus('error','Bad response from script. Re-deploy as new version and try again.');
-      console.error('Parse error:',text.slice(0,200));
+      setSyncStatus('error','Bad response — try redeploying as a new version in Apps Script');
+      console.error('Parse error:',text.slice(0,300));
       return false;
     }
     if(json.success&&json.data){
@@ -603,13 +617,12 @@ async function pullFromSheets(){
       if(lt)dailyData[todayStr()]=lt;
       saveLocal();setSyncStatus('synced','Loaded from Google Sheets');return true;
     }else if(json.success){
-      setSyncStatus('synced','Connected - no data yet');return true;
+      setSyncStatus('synced','Connected — no data yet');return true;
     }else{
       setSyncStatus('error','Script error: '+(json.error||'unknown'));return false;
     }
   }catch(e){
-    setSyncStatus('error','Connection failed: '+e.message);
-    console.error('Fetch error:',e);
+    setSyncStatus('error','Unexpected error: '+e.message);
     return false;
   }
 }
