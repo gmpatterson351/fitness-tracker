@@ -576,25 +576,42 @@ async function pushToSheets(){
   setSyncStatus('syncing','Saving to Google Sheets...');
   try{
     const url=SHEET_URL+'?action=write&key='+encodeURIComponent(SECRET_KEY)+'&payload='+encodeURIComponent(JSON.stringify({weekly:weekData,daily:dailyData}));
-    const res=await fetch(url);const json=await res.json();
-    if(json.success){const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});setSyncStatus('synced','Synced to Google Sheets at '+t);}
-    else setSyncStatus('error','Sync error: '+json.error);
+    const res=await fetch(url,{redirect:'follow'});
+    const text=await res.text();
+    let json;
+    try{json=JSON.parse(text);}catch(pe){setSyncStatus('error','Bad response - saved locally');return;}
+    if(json.success){const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});setSyncStatus('synced','Synced at '+t);}
+    else setSyncStatus('error','Sync error: '+(json.error||'unknown'));
   }catch(e){setSyncStatus('error','Could not reach Google Sheets - saved locally');}
 }
 async function pullFromSheets(){
   if(!SHEET_URL)return false;
   setSyncStatus('syncing','Loading from Google Sheets...');
   try{
-    const res=await fetch(SHEET_URL+'?action=read&key='+encodeURIComponent(SECRET_KEY));
-    const json=await res.json();
+    const res=await fetch(SHEET_URL+'?action=read&key='+encodeURIComponent(SECRET_KEY),{redirect:'follow'});
+    const text=await res.text();
+    let json;
+    try{json=JSON.parse(text);}catch(pe){
+      setSyncStatus('error','Bad response from script. Re-deploy as new version and try again.');
+      console.error('Parse error:',text.slice(0,200));
+      return false;
+    }
     if(json.success&&json.data){
       const lt=dailyData[todayStr()];
       weekData=Object.assign({},json.data.weekly||{},weekData);
       dailyData=Object.assign({},json.data.daily||{},dailyData);
       if(lt)dailyData[todayStr()]=lt;
       saveLocal();setSyncStatus('synced','Loaded from Google Sheets');return true;
-    }else{setSyncStatus('synced','Connected - no data yet');return true;}
-  }catch(e){setSyncStatus('error','Could not load from Google Sheets');return false;}
+    }else if(json.success){
+      setSyncStatus('synced','Connected - no data yet');return true;
+    }else{
+      setSyncStatus('error','Script error: '+(json.error||'unknown'));return false;
+    }
+  }catch(e){
+    setSyncStatus('error','Connection failed: '+e.message);
+    console.error('Fetch error:',e);
+    return false;
+  }
 }
 function schedulePush(){if(syncTimer)clearTimeout(syncTimer);syncTimer=setTimeout(pushToSheets,2500);}
 
@@ -610,7 +627,10 @@ document.getElementById('setup-btn').addEventListener('click',async()=>{
   SHEET_URL=url;SECRET_KEY=key;localStorage.setItem('ft_url',url);localStorage.setItem('ft_key',key);
   const ok=await pullFromSheets();
   if(ok){document.getElementById('setup-screen').classList.add('hidden');currentWeekKey=getWeekKey(new Date());renderAll();initMorning();if(document.getElementById('morning-overlay').classList.contains('hidden'))checkDailyLog();}
-  else err.textContent='Could not connect. Check the URL and make sure access is set to Anyone.';
+  else{
+    const syncBar=document.getElementById('sync-bar');
+    err.textContent='Could not connect. '+syncBar.textContent;
+  }
 });
 
 function openLog(dateStr){
