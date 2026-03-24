@@ -88,6 +88,20 @@ body{font-family:'Libre Franklin',sans-serif;background:var(--cream);color:var(-
 .water-item input[type=checkbox]{width:18px;height:18px;accent-color:#4a9eff;cursor:pointer;}
 .water-item label{font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;}
 .water-item.item-done label{color:#1565c0;}
+.meal-sections{display:flex;flex-direction:column;gap:0;}
+.meal-section{padding:10px 0;border-bottom:1px solid var(--border);}
+.meal-section:last-child{border-bottom:none;}
+.meal-total-section{background:var(--warm);border-radius:10px;padding:10px 10px;margin-top:6px;}
+.meal-section-hdr{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.meal-total-section .meal-section-hdr{color:var(--navy);}
+.meal-macro-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.meal-macro-field{}
+.meal-macro-lbl{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px;}
+.meal-macro-wrap{display:flex;align-items:baseline;gap:4px;}
+.meal-macro-input{font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);border:none;background:transparent;width:100%;outline:none;border-bottom:1.5px solid var(--border);padding-bottom:1px;transition:border-color 0.2s;}
+.meal-macro-input:focus{border-color:var(--accent);}
+.meal-macro-unit{font-size:11px;color:var(--muted);white-space:nowrap;}
+.meal-total-val{font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);min-width:40px;}
 .macro-calc-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
 .macro-calc-input{flex:1;padding:9px 11px;border:1.5px solid var(--border);border-radius:10px;font-family:'Libre Franklin',sans-serif;font-size:14px;color:var(--text);background:var(--warm);outline:none;transition:border-color 0.2s;}
 .macro-calc-input:focus{border-color:var(--accent);}
@@ -339,28 +353,71 @@ main{max-width:900px;margin:0 auto;padding:20px 14px 60px;display:grid;gap:16px;
         <div class="calc-total-item"><div class="calc-total-val" id="calc-total-fiber">0g</div><div class="calc-total-lbl">Fiber</div></div>
       </div>
       <div class="calc-actions" id="calc-actions" style="display:none;">
-        <button class="btn-calc-use" id="btn-calc-use">&#8595; Use Protein &amp; Fiber</button>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;width:100%;">
+          <span style="font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap;">Add to:</span>
+          <select id="calc-meal-target" style="flex:1;padding:8px 10px;border:1.5px solid var(--border);border-radius:10px;font-family:'Libre Franklin',sans-serif;font-size:13px;color:var(--text);background:var(--warm);outline:none;cursor:pointer;">
+            <option value="breakfast">Breakfast</option>
+            <option value="lunch">Lunch</option>
+            <option value="dinner">Dinner</option>
+            <option value="snack">Snack</option>
+          </select>
+        </div>
+        <button class="btn-calc-use" id="btn-calc-use">&#8595; Copy to Meal</button>
         <button class="btn-calc-clear" id="btn-calc-clear">Clear</button>
       </div>
     </div>
     <div class="dl-card">
       <div class="dl-stitle">&#129382; Nutrition</div>
-      <div class="macro-row">
-        <div class="macro-field">
-          <span class="macro-lbl">Protein</span>
-          <div class="macro-input-wrap">
-            <input class="macro-input" type="number" id="dl-protein" placeholder="&mdash;">
-            <span class="macro-unit">g</span>
+      <div class="meal-sections">
+        <!-- Breakfast -->
+        <div class="meal-section" id="meal-section-breakfast">
+          <div class="meal-section-hdr">&#9728;&#65039; Breakfast</div>
+          <div class="meal-macro-row">
+            <div class="meal-macro-field"><span class="meal-macro-lbl">Protein</span><div class="meal-macro-wrap"><input class="meal-macro-input" type="number" id="dl-breakfast-protein" placeholder="&mdash;"><span class="meal-macro-unit">g</span></div></div>
+            <div class="meal-macro-field"><span class="meal-macro-lbl">Fiber</span><div class="meal-macro-wrap"><input class="meal-macro-input" type="number" id="dl-breakfast-fiber" placeholder="&mdash;"><span class="meal-macro-unit">g</span></div></div>
+            <div class="meal-macro-field"><span class="meal-macro-lbl">Calories</span><div class="meal-macro-wrap"><input class="meal-macro-input" type="number" id="dl-breakfast-cal" placeholder="&mdash;"><span class="meal-macro-unit">cal</span></div></div>
           </div>
         </div>
-        <div class="macro-field">
-          <span class="macro-lbl">Fiber</span>
-          <div class="macro-input-wrap">
-            <input class="macro-input" type="number" id="dl-fiber" placeholder="&mdash;">
-            <span class="macro-unit">g</span>
+        <!-- Lunch -->
+        <div class="meal-section" id="meal-section-lunch">
+          <div class="meal-section-hdr">&#9728;&#65039; Lunch</div>
+          <div class="meal-macro-row">
+            <div class="meal-macro-field"><span class="meal-macro-lbl">Protein</span><div class="meal-macro-wrap"><input class="meal-macro-input" type="number" id="dl-lunch-protein" placeholder="&mdash;"><span class="meal-macro-unit">g</span></div></div>
+            <div class="meal-macro-field"><span class="meal-macro-lbl">Fiber</span><div class="meal-macro-wrap"><input class="meal-macro-input" type="number" id="dl-lunch-fiber" placeholder="&mdash;"><span class="meal-macro-unit">g</span></div></div>
+            <div class="meal-macro-field"><span class="meal-macro-lbl">Calories</span><div class="meal-macro-wrap"><input class="meal-macro-input" type="number" id="dl-lunch-cal" placeholder="&mdash;"><span class="meal-macro-unit">cal</span></div></div>
+          </div>
+        </div>
+        <!-- Dinner -->
+        <div class="meal-section" id="meal-section-dinner">
+          <div class="meal-section-hdr">&#127769; Dinner</div>
+          <div class="meal-macro-row">
+            <div class="meal-macro-field"><span class="meal-macro-lbl">Protein</span><div class="meal-macro-wrap"><input class="meal-macro-input" type="number" id="dl-dinner-protein" placeholder="&mdash;"><span class="meal-macro-unit">g</span></div></div>
+            <div class="meal-macro-field"><span class="meal-macro-lbl">Fiber</span><div class="meal-macro-wrap"><input class="meal-macro-input" type="number" id="dl-dinner-fiber" placeholder="&mdash;"><span class="meal-macro-unit">g</span></div></div>
+            <div class="meal-macro-field"><span class="meal-macro-lbl">Calories</span><div class="meal-macro-wrap"><input class="meal-macro-input" type="number" id="dl-dinner-cal" placeholder="&mdash;"><span class="meal-macro-unit">cal</span></div></div>
+          </div>
+        </div>
+        <!-- Snack -->
+        <div class="meal-section" id="meal-section-snack">
+          <div class="meal-section-hdr">&#127822; Snack</div>
+          <div class="meal-macro-row">
+            <div class="meal-macro-field"><span class="meal-macro-lbl">Protein</span><div class="meal-macro-wrap"><input class="meal-macro-input" type="number" id="dl-snack-protein" placeholder="&mdash;"><span class="meal-macro-unit">g</span></div></div>
+            <div class="meal-macro-field"><span class="meal-macro-lbl">Fiber</span><div class="meal-macro-wrap"><input class="meal-macro-input" type="number" id="dl-snack-fiber" placeholder="&mdash;"><span class="meal-macro-unit">g</span></div></div>
+            <div class="meal-macro-field"><span class="meal-macro-lbl">Calories</span><div class="meal-macro-wrap"><input class="meal-macro-input" type="number" id="dl-snack-cal" placeholder="&mdash;"><span class="meal-macro-unit">cal</span></div></div>
+          </div>
+        </div>
+        <!-- Daily Total -->
+        <div class="meal-section meal-total-section">
+          <div class="meal-section-hdr">&#931; Daily Total</div>
+          <div class="meal-macro-row">
+            <div class="meal-macro-field"><span class="meal-macro-lbl">Protein</span><div class="meal-macro-wrap"><div class="meal-total-val" id="dl-total-protein">-</div><span class="meal-macro-unit">g</span></div></div>
+            <div class="meal-macro-field"><span class="meal-macro-lbl">Fiber</span><div class="meal-macro-wrap"><div class="meal-total-val" id="dl-total-fiber">-</div><span class="meal-macro-unit">g</span></div></div>
+            <div class="meal-macro-field"><span class="meal-macro-lbl">Calories</span><div class="meal-macro-wrap"><div class="meal-total-val" id="dl-total-cal">-</div><span class="meal-macro-unit">cal</span></div></div>
           </div>
         </div>
       </div>
+      <!-- Hidden fields for backward compat with save/load -->
+      <input type="hidden" id="dl-protein">
+      <input type="hidden" id="dl-fiber">
     </div>
     <div class="dl-card" id="pt-card">
       <div class="dl-stitle">&#129496; Daily PT Program</div>
@@ -592,7 +649,7 @@ function todayIdx(){return dayIdx(todayStr());}
 function fmtDate(dateStr){const d=new Date(dateStr+'T12:00:00');const DN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];return DN[d.getDay()]+', '+MN[d.getMonth()]+' '+d.getDate();}
 function weekDates(wk){return Array.from({length:7},(_,i)=>{const d=new Date(wk+'T12:00:00');d.setDate(d.getDate()+i);return d.toISOString().split('T')[0];});}
 
-function blankDay(){return{activities:{},water:[false,false,false,false,false,false,false,false],steps:'',protein:'',fiber:'',hourly10x10:[false,false,false,false,false,false,false,false,false],pain:3,weight:'',notes:'',savedAt:null};}
+function blankDay(){return{activities:{},water:[false,false,false,false,false,false,false,false],steps:'',protein:'',fiber:'',meals:{breakfast:{protein:'',fiber:'',cal:''},lunch:{protein:'',fiber:'',cal:''},dinner:{protein:'',fiber:'',cal:''},snack:{protein:'',fiber:'',cal:''}},hourly10x10:[false,false,false,false,false,false,false,false,false],pain:3,weight:'',notes:'',savedAt:null};}
 function blankWeek(){return{weight:'',goalWeight:'',startWeight:'',pain:3,noteWell:'',noteHard:'',notePlan:'',noteReward:''};}
 function getDayRec(d){return dailyData[d]?Object.assign(blankDay(),dailyData[d]):blankDay();}
 function getWeekRec(k){return weekData[k]?Object.assign(blankWeek(),weekData[k]):blankWeek();}
@@ -726,6 +783,18 @@ function openLog(dateStr){
   document.getElementById('dl-notes').value=rec.notes||'';
   document.getElementById('dl-protein').value=rec.protein||'';
   document.getElementById('dl-fiber').value=rec.fiber||'';
+  // Meal sections
+  const meals=rec.meals||{breakfast:{protein:'',fiber:'',cal:''},lunch:{protein:'',fiber:'',cal:''},dinner:{protein:'',fiber:'',cal:''},snack:{protein:'',fiber:'',cal:''}};
+  ['breakfast','lunch','dinner','snack'].forEach(meal=>{
+    const m=meals[meal]||{};
+    const pEl=document.getElementById('dl-'+meal+'-protein');
+    const fEl=document.getElementById('dl-'+meal+'-fiber');
+    const cEl=document.getElementById('dl-'+meal+'-cal');
+    if(pEl)pEl.value=m.protein||'';
+    if(fEl)fEl.value=m.fiber||'';
+    if(cEl)cEl.value=m.cal||'';
+  });
+  updateMealTotals();
   document.getElementById('dl-steps').value=rec.steps||'';
   const stepsChk=document.getElementById('cb-steps');
   if(stepsChk)stepsChk.checked=!!(rec.activities&&rec.activities['steps']);
@@ -761,8 +830,19 @@ function saveLog(){
   rec.pain=parseInt(document.getElementById('dl-pain-slider').value);
   rec.weight=document.getElementById('dl-weight').value;
   rec.notes=document.getElementById('dl-notes').value;
-  rec.protein=document.getElementById('dl-protein').value;
-  rec.fiber=document.getElementById('dl-fiber').value;
+  // Save meal sections
+  rec.meals={};
+  ['breakfast','lunch','dinner','snack'].forEach(meal=>{
+    const p=document.getElementById('dl-'+meal+'-protein');
+    const f=document.getElementById('dl-'+meal+'-fiber');
+    const c=document.getElementById('dl-'+meal+'-cal');
+    rec.meals[meal]={protein:p?p.value:'',fiber:f?f.value:'',cal:c?c.value:''};
+  });
+  // Roll up totals into top-level protein/fiber for backward compat with stats
+  let totalPro=0,totalFib=0;
+  Object.values(rec.meals).forEach(m=>{if(m.protein)totalPro+=parseFloat(m.protein)||0;if(m.fiber)totalFib+=parseFloat(m.fiber)||0;});
+  rec.protein=totalPro>0?totalPro.toString():'';
+  rec.fiber=totalFib>0?totalFib.toString():'';
   rec.steps=document.getElementById('dl-steps').value;
   // Steps checkbox
   const stepsCb=document.getElementById('cb-steps');
@@ -1427,18 +1507,22 @@ document.getElementById('calc-qty').addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); addCalcIngredient(); }
 });
 document.getElementById('btn-calc-use').addEventListener('click', () => {
-  let totPro = 0, totFiber = 0;
-  calcItems.forEach(item => { totPro += item.macros.pro; totFiber += item.macros.fiber; });
-  const proEl = document.getElementById('dl-protein');
-  const fibEl = document.getElementById('dl-fiber');
+  let totCal=0, totPro=0, totFiber=0;
+  calcItems.forEach(item => { totCal+=item.macros.cal; totPro+=item.macros.pro; totFiber+=item.macros.fiber; });
+  const meal = document.getElementById('calc-meal-target').value;
+  const proEl = document.getElementById('dl-'+meal+'-protein');
+  const fibEl = document.getElementById('dl-'+meal+'-fiber');
+  const calEl = document.getElementById('dl-'+meal+'-cal');
   if (proEl) proEl.value = Math.round(totPro * 10) / 10;
   if (fibEl) fibEl.value = Math.round(totFiber * 10) / 10;
-  // Flash the fields
-  [proEl, fibEl].forEach(el => {
+  if (calEl) calEl.value = Math.round(totCal);
+  // Flash
+  [proEl, fibEl, calEl].forEach(el => {
     if (!el) return;
     el.style.borderColor = 'var(--green-dark)';
     setTimeout(() => el.style.borderColor = '', 1500);
   });
+  updateMealTotals();
 });
 document.getElementById('btn-calc-clear').addEventListener('click', () => {
   calcItems = [];
@@ -1446,6 +1530,29 @@ document.getElementById('btn-calc-clear').addEventListener('click', () => {
   document.getElementById('calc-not-found').textContent = '';
 });
 
+function updateMealTotals(){
+  let totP=0,totF=0,totC=0,hasAny=false;
+  ['breakfast','lunch','dinner','snack'].forEach(meal=>{
+    const p=parseFloat(document.getElementById('dl-'+meal+'-protein')?.value)||0;
+    const f=parseFloat(document.getElementById('dl-'+meal+'-fiber')?.value)||0;
+    const c=parseFloat(document.getElementById('dl-'+meal+'-cal')?.value)||0;
+    totP+=p;totF+=f;totC+=c;
+    if(p||f||c)hasAny=true;
+  });
+  const tpEl=document.getElementById('dl-total-protein');
+  const tfEl=document.getElementById('dl-total-fiber');
+  const tcEl=document.getElementById('dl-total-cal');
+  if(tpEl)tpEl.textContent=hasAny?Math.round(totP*10)/10:'-';
+  if(tfEl)tfEl.textContent=hasAny?Math.round(totF*10)/10:'-';
+  if(tcEl)tcEl.textContent=hasAny?Math.round(totC):'-';
+}
+// Wire up meal input changes
+['breakfast','lunch','dinner','snack'].forEach(meal=>{
+  ['protein','fiber','cal'].forEach(field=>{
+    const el=document.getElementById('dl-'+meal+'-'+field);
+    if(el)el.addEventListener('input',updateMealTotals);
+  });
+});
 function checkDailyLog(){const rec=getDayRec(todayStr());if(!rec.savedAt)openLog(todayStr());renderTodaySummary();renderStatusBar();}
 
 let morningInterval=null;
