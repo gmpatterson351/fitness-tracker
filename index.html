@@ -655,7 +655,6 @@ function openLog(dateStr){
   document.getElementById('dl-subtitle').textContent=fmtDate(viewingDate)+' - '+DAY_SUBS[idx];
   document.getElementById('dl-nav-lbl').textContent=isToday?'Today':new Date(viewingDate+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
   document.getElementById('dl-next').disabled=isToday;
-  document.getElementById('eod-card').style.display=isToday?'':'none';
   const waterVals=rec.water||Array(8).fill(false);
   waterVals.forEach((val,i)=>{
     const cb=document.getElementById('wc-'+i);
@@ -704,12 +703,7 @@ function openLog(dateStr){
     if(el){el.checked=ptDone[id]||false;if(wrap)wrap.classList.toggle('item-done',ptDone[id]||false);}
   });
   updatePTProgress();
-  ['clothes','water','tomorrow'].forEach(k=>{
-    const cb=document.getElementById('cb-eod-'+k);
-    const wp=document.getElementById('wrap-eod-'+k);
-    const val=rec['eod'+k.charAt(0).toUpperCase()+k.slice(1)]||false;
-    cb.checked=val;wp.classList.toggle('item-done',val);
-  });
+
   document.getElementById('daily-overlay').classList.add('visible');
 }
 
@@ -746,7 +740,7 @@ function saveLog(){
 }
 
 document.getElementById('dl-pain-slider').addEventListener('input',e=>setPain('dl-pain-val',e.target.value));
-['clothes','water','tomorrow'].forEach(k=>{document.getElementById('cb-eod-'+k).addEventListener('change',e=>document.getElementById('wrap-eod-'+k).classList.toggle('item-done',e.target.checked));});
+
 document.getElementById('btn-save-daily').addEventListener('click',saveLog);
 document.getElementById('btn-skip').addEventListener('click',()=>{
   if(viewingDate===todayStr()){const rec=getDayRec(viewingDate);rec.savedAt=rec.savedAt||Date.now();dailyData[viewingDate]=rec;saveLocal();schedulePush();renderTodaySummary();}
