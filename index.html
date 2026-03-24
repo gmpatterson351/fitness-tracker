@@ -483,9 +483,9 @@ main{max-width:900px;margin:0 auto;padding:20px 14px 60px;display:grid;gap:16px;
         <div class="wk-total-card"><div class="wk-total-num" id="wkt-water">0/7</div><div class="wk-total-lbl">Full Water Days</div></div>
         <div class="wk-total-card"><div class="wk-total-num" id="wkt-protein">-</div><div class="wk-total-lbl">Avg Protein (g)</div></div>
         <div class="wk-total-card"><div class="wk-total-num" id="wkt-fiber">-</div><div class="wk-total-lbl">Avg Fiber (g)</div></div>
-        <div class="wk-total-card"><div class="wk-total-num" id="wkt-hourly">0/9</div><div class="wk-total-lbl">Best 10x10 Day</div></div>
+        <div class="wk-total-card"><div class="wk-total-num" id="wkt-hourly">-</div><div class="wk-total-lbl">Avg 10x10/Day</div></div>
         <div class="wk-total-card"><div class="wk-total-num" id="wkt-pain">-</div><div class="wk-total-lbl">Avg Pain</div></div>
-        <div class="wk-total-card"><div class="wk-total-num" id="wkt-logged">0/7</div><div class="wk-total-lbl">Days Logged</div></div>
+        <div class="wk-total-card"><div class="wk-total-num" id="wkt-avg-weight">-</div><div class="wk-total-lbl">Avg Weight (lbs)</div></div>
       </div>
     </div>
 
@@ -517,33 +517,16 @@ main{max-width:900px;margin:0 auto;padding:20px 14px 60px;display:grid;gap:16px;
       </div>
     </div>
 
-    <!-- Weekly Macros -->
-    <div class="card">
-      <div class="section-title">Weekly Nutrition Averages</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;">
-        <div class="metric-card">
-          <div class="metric-label">Avg Daily Protein</div>
-          <div class="metric-wrap"><div class="metric-input" id="wk-avg-protein" style="font-family:'Playfair Display',serif;font-size:30px;color:var(--navy);border-bottom:2px solid var(--border);padding-bottom:3px;min-width:60px;">-</div><span class="metric-unit">g</span></div>
-          <div class="metric-delta" id="wk-protein-days" style="font-size:11px;color:var(--muted);"></div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Avg Daily Fiber</div>
-          <div class="metric-wrap"><div class="metric-input" id="wk-avg-fiber" style="font-family:'Playfair Display',serif;font-size:30px;color:var(--navy);border-bottom:2px solid var(--border);padding-bottom:3px;min-width:60px;">-</div><span class="metric-unit">g</span></div>
-          <div class="metric-delta" id="wk-fiber-days" style="font-size:11px;color:var(--muted);"></div>
-        </div>
-      </div>
-    </div>
-
     <!-- All-Time Stats -->
     <div>
       <div class="section-title">All-Time Stats</div>
       <div class="streak-row">
-        <div class="streak-card"><div class="streak-num" id="all-workouts">0</div><div class="streak-lbl">Total Workout Days</div></div>
-        <div class="streak-card"><div class="streak-num" id="all-steps">-</div><div class="streak-lbl">Avg Daily Steps</div></div>
-        <div class="streak-card"><div class="streak-num" id="all-morning">0</div><div class="streak-lbl">Full Water Days</div></div>
-        <div class="streak-card"><div class="streak-num" id="all-morning-pct" style="font-size:28px;">--%</div><div class="streak-lbl">Water Consistency</div></div>
-        <div class="streak-card"><div class="streak-num" id="all-weight-lost">-</div><div class="streak-lbl">Total Weight Lost</div></div>
-        <div class="streak-card"><div class="streak-num" id="all-weight-week">-</div><div class="streak-lbl">Lost This Week</div></div>
+        <div class="streak-card"><div class="streak-num" id="all-workout-pct" style="font-size:26px;">--%</div><div class="streak-lbl">Workout Consistency</div></div>
+        <div class="streak-card"><div class="streak-num" id="all-steps" style="font-size:22px;">-</div><div class="streak-lbl">Avg Daily Steps</div></div>
+        <div class="streak-card"><div class="streak-num" id="all-avg-protein">-</div><div class="streak-lbl">Avg Protein (g)</div></div>
+        <div class="streak-card"><div class="streak-num" id="all-avg-fiber">-</div><div class="streak-lbl">Avg Fiber (g)</div></div>
+        <div class="streak-card"><div class="streak-num" id="all-morning-pct" style="font-size:26px;">--%</div><div class="streak-lbl">Water Consistency</div></div>
+        <div class="streak-card"><div class="streak-num" id="all-weight-lost" style="font-size:26px;">-</div><div class="streak-lbl">Total Weight Lost</div></div>
       </div>
     </div>
 
@@ -856,34 +839,44 @@ function renderWeekDays(){
 function renderWeekStats(){const s=weekSummary(currentWeekKey);document.getElementById('stat-workouts').textContent=s.workouts;document.getElementById('stat-pt').textContent=s.ptDays;document.getElementById('stat-streak').textContent=calcStreak();}
 function calcStreak(){let streak=0,key=getWeekKey(new Date());for(let i=0;i<52;i++){const s=weekSummary(key);if(s.workouts>=4){streak++;key=offsetWeek(key,-1);}else break;}return streak;}
 function renderAllTimeStats(){
-  const byWk={};
-  let totalMorning=0,loggedDays=0,totalSteps=0,stepDays=0;
+  let loggedDays=0,workoutDays=0,totalMorning=0,totalSteps=0,stepDays=0;
+  let totalProtein=0,proteinDays=0,totalFiber=0,fiberDays=0;
   const sortedDates=Object.keys(dailyData).filter(ds=>dailyData[ds]&&dailyData[ds].savedAt).sort();
   sortedDates.forEach(ds=>{
     const rec=dailyData[ds];
     loggedDays++;
+    const idx=dayIdx(ds);const acts=DAY_ACTS[idx];const done=rec.activities||{};
+    if(acts.some(a=>done[a.key]))workoutDays++;
     if(rec.water&&rec.water.filter(Boolean).length===8)totalMorning++;
     if(rec.steps&&parseFloat(rec.steps)>0){totalSteps+=parseFloat(rec.steps);stepDays++;}
-    const wk=getWeekKey(new Date(ds+'T12:00:00'));
-    const idx=dayIdx(ds);const acts=DAY_ACTS[idx];const done=rec.activities||{};
-    if(!byWk[wk])byWk[wk]=0;
-    if(acts.some(a=>done[a.key]))byWk[wk]++;
+    if(rec.protein&&parseFloat(rec.protein)>0){totalProtein+=parseFloat(rec.protein);proteinDays++;}
+    if(rec.fiber&&parseFloat(rec.fiber)>0){totalFiber+=parseFloat(rec.fiber);fiberDays++;}
   });
-  const counts=Object.values(byWk);
-  const totalW=counts.reduce((a,b)=>a+b,0);
-  const pct=loggedDays>0?Math.round((totalMorning/loggedDays)*100):0;
+  const workoutPct=loggedDays>0?Math.round((workoutDays/loggedDays)*100):0;
+  const waterPct=loggedDays>0?Math.round((totalMorning/loggedDays)*100):0;
   const avgSteps=stepDays>0?Math.round(totalSteps/stepDays):null;
-  document.getElementById('all-workouts').textContent=totalW;
+  const avgProtein=proteinDays>0?Math.round(totalProtein/proteinDays):null;
+  const avgFiber=fiberDays>0?Math.round(totalFiber/fiberDays):null;
+  // Workout consistency
+  const woPctEl=document.getElementById('all-workout-pct');
+  if(woPctEl){woPctEl.textContent=loggedDays>0?workoutPct+'%':'--';woPctEl.style.color=workoutPct>=80?'var(--green-dark)':workoutPct>=60?'var(--gold)':'var(--red)';}
+  // Avg steps
   const stepsEl=document.getElementById('all-steps');
   if(stepsEl)stepsEl.textContent=avgSteps?avgSteps.toLocaleString():'-';
-  document.getElementById('all-morning').textContent=totalMorning;
-  const pctEl=document.getElementById('all-morning-pct');
-  if(pctEl){pctEl.textContent=loggedDays>0?pct+'%':'--';pctEl.style.color=pct>=80?'var(--green-dark)':pct>=60?'var(--gold)':'var(--red)';}
-  // Weight stats are populated by renderWeeklyWeight
+  // Avg protein
+  const proEl=document.getElementById('all-avg-protein');
+  if(proEl)proEl.textContent=avgProtein?avgProtein+'g':'-';
+  // Avg fiber
+  const fibEl=document.getElementById('all-avg-fiber');
+  if(fibEl)fibEl.textContent=avgFiber?avgFiber+'g':'-';
+  // Water consistency
+  const waterPctEl=document.getElementById('all-morning-pct');
+  if(waterPctEl){waterPctEl.textContent=loggedDays>0?waterPct+'%':'--';waterPctEl.style.color=waterPct>=80?'var(--green-dark)':waterPct>=60?'var(--gold)':'var(--red)';}
+  // Total weight lost — populated by renderWeeklyWeight
 }
 function renderWeeklyTotals(){
   const dates = weekDates(currentWeekKey);
-  let ptDays=0, strengthDays=0, stepDays=0, waterDays=0;
+  let ptDays=0, strengthDays=0, stepDays=0, waterDays=0, totalHourly=0;
   let totalProtein=0, proteinCount=0, totalFiber=0, fiberCount=0;
   let bestHourly=0, totalPain=0, painCount=0, logged=0;
 
@@ -917,18 +910,14 @@ function renderWeeklyTotals(){
   set('wkt-water', waterDays+'/7', waterDays===7?'on':waterDays>0?'warn':'');
   set('wkt-protein', proteinCount>0?Math.round(totalProtein/proteinCount)+'g':'-', '');
   set('wkt-fiber', fiberCount>0?Math.round(totalFiber/fiberCount)+'g':'-', '');
-  set('wkt-hourly', bestHourly+'/9', bestHourly===9?'on':bestHourly>0?'warn':'');
+  const avgHourly=logged>0?(totalHourly/logged).toFixed(1):'-';
+  set('wkt-hourly', avgHourly+(logged>0?'/9':''), parseFloat(avgHourly)>=7?'on':parseFloat(avgHourly)>0?'warn':'');
   set('wkt-pain', painCount>0?(totalPain/painCount).toFixed(1)+'/10':'-', '');
-  set('wkt-logged', logged+'/7', logged===7?'on':logged>0?'warn':'');
-  // Weekly nutrition averages
-  const avgProEl = document.getElementById('wk-avg-protein');
-  const avgFibEl = document.getElementById('wk-avg-fiber');
-  const proDaysEl = document.getElementById('wk-protein-days');
-  const fibDaysEl = document.getElementById('wk-fiber-days');
-  if (avgProEl) avgProEl.textContent = proteinCount>0 ? Math.round(totalProtein/proteinCount) : '-';
-  if (avgFibEl) avgFibEl.textContent = fiberCount>0 ? Math.round(totalFiber/fiberCount) : '-';
-  if (proDaysEl) proDaysEl.textContent = proteinCount>0 ? 'tracked '+proteinCount+' day'+(proteinCount!==1?'s':'') : 'no data logged';
-  if (fibDaysEl) fibDaysEl.textContent = fiberCount>0 ? 'tracked '+fiberCount+' day'+(fiberCount!==1?'s':'') : 'no data logged';
+  // Average weight this week
+  let totalWeight=0,weightDays=0;
+  dates.forEach(ds=>{const rec=getDayRec(ds);if(rec.weight&&parseFloat(rec.weight)>0){totalWeight+=parseFloat(rec.weight);weightDays++;}});
+  const avgWeightEl=document.getElementById('wkt-avg-weight');
+  if(avgWeightEl)avgWeightEl.textContent=weightDays>0?(totalWeight/weightDays).toFixed(1):'-';
 }
 
 function renderWeekNotes(){
@@ -993,7 +982,7 @@ function renderWeeklyWeight(){
     }
     // Update all-time weight loss cards
     const totalLostEl = document.getElementById('all-weight-lost');
-    const weekLostEl = document.getElementById('all-weight-week');
+    const weekLostEl = null; // removed from UI
     if (totalLostEl) {
       const tl = startW - lowestThisWeek;
       totalLostEl.textContent = tl > 0 ? tl.toFixed(1) + ' lbs' : '-';
@@ -1144,6 +1133,7 @@ function generateReport(){
     if(rec.fiber){totalFiber+=parseFloat(rec.fiber);fiberCount++;}
     const h10=(rec.hourly10x10||[]).filter(Boolean).length;
     if(h10>bestHourly)bestHourly=h10;
+    totalHourly+=h10;
     if(rec.pain){totalPain+=rec.pain;painCount++;}
     const parts=[pt,str];
     if(rec.steps&&acts['steps'])parts.push('Steps: '+parseInt(rec.steps).toLocaleString());
@@ -1173,17 +1163,26 @@ function generateReport(){
   lines.push('');
   lines.push('SUMMARY');
   lines.push(sep30);
-  lines.push('Days Logged:     '+logged+'/7');
+  // Compute avg weight and avg 10x10 for report
+  let rptTotalWt=0,rptWtDays=0,rptTotalHourly=0,rptHourlyDays=0;
+  dates.forEach(ds=>{
+    const rec=getDayRec(ds);
+    if(rec.weight&&parseFloat(rec.weight)>0){rptTotalWt+=parseFloat(rec.weight);rptWtDays++;}
+    if(rec.savedAt){const h10=(rec.hourly10x10||[]).filter(Boolean).length;rptTotalHourly+=h10;rptHourlyDays++;}
+  });
+  const avgWeightRpt=rptWtDays>0?(rptTotalWt/rptWtDays).toFixed(1)+' lbs':'-';
+  const avgHourlyRpt=rptHourlyDays>0?(rptTotalHourly/rptHourlyDays).toFixed(1)+'/9':'-';
   lines.push('PT Completed:    '+ptDays+'/7');
   lines.push('Strength:        '+strengthDays+'/7');
   lines.push('Step Goals Met:  '+stepDays+'/7');
   lines.push('Full Water Days: '+waterDays+'/7');
-  lines.push('Best 10x10 Day:  '+bestHourly+'/9 hours');
+  lines.push('Avg 10x10/Day:   '+avgHourlyRpt);
   lines.push('Avg Protein:     '+avgProtein);
   lines.push('Avg Fiber:       '+avgFiber);
   lines.push('Avg Pain:        '+avgPain+(painCount>0?' ('+PW[Math.round(totalPain/painCount)]+')':''));
-  lines.push('Weight (lowest):  '+curWeight);
-  lines.push('Total Lost:       '+totalLostRpt+' (since 201.2 on 1/17/26)');
+  lines.push('Avg Weight:      '+avgWeightRpt);
+  lines.push('Lowest Weight:   '+curWeight);
+  lines.push('Total Lost:      '+totalLostRpt+' (since 201.2 on 1/17/26)');
   lines.push('Avg Protein:      '+avgProtein);
   lines.push('Avg Fiber:        '+avgFiber);
   lines.push('');
