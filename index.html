@@ -88,6 +88,29 @@ body{font-family:'Libre Franklin',sans-serif;background:var(--cream);color:var(-
 .water-item input[type=checkbox]{width:18px;height:18px;accent-color:#4a9eff;cursor:pointer;}
 .water-item label{font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;}
 .water-item.item-done label{color:#1565c0;}
+.macro-calc-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.macro-calc-input{flex:1;padding:9px 11px;border:1.5px solid var(--border);border-radius:10px;font-family:'Libre Franklin',sans-serif;font-size:14px;color:var(--text);background:var(--warm);outline:none;transition:border-color 0.2s;}
+.macro-calc-input:focus{border-color:var(--accent);}
+.macro-calc-qty{width:72px;padding:9px 8px;border:1.5px solid var(--border);border-radius:10px;font-family:'Libre Franklin',sans-serif;font-size:14px;color:var(--text);background:var(--warm);outline:none;transition:border-color 0.2s;text-align:center;}
+.macro-calc-qty:focus{border-color:var(--accent);}
+.btn-add-ingredient{padding:9px 14px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;font-family:'Libre Franklin',sans-serif;}
+.btn-add-ingredient:hover{background:#3a8eef;}
+.calc-ingredient-list{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;max-height:180px;overflow-y:auto;}
+.calc-ingredient-row{display:flex;align-items:center;justify-content:space-between;background:var(--warm);border-radius:8px;padding:7px 10px;font-size:13px;}
+.calc-ingredient-name{flex:1;font-weight:500;color:var(--text);}
+.calc-ingredient-macros{font-size:11px;color:var(--muted);margin:0 8px;}
+.calc-ingredient-remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;line-height:1;}
+.calc-ingredient-remove:hover{color:var(--red);}
+.calc-totals{background:var(--navy);border-radius:10px;padding:10px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;}
+.calc-total-item{text-align:center;}
+.calc-total-val{font-family:'Playfair Display',serif;font-size:20px;color:#fff;line-height:1;}
+.calc-total-lbl{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-top:2px;}
+.calc-actions{display:flex;gap:8px;}
+.btn-calc-use{flex:1;padding:10px;border-radius:50px;border:none;background:var(--green-dark);color:#fff;font-family:'Libre Franklin',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn-calc-use:hover{background:#219a52;}
+.btn-calc-clear{padding:10px 16px;border-radius:50px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-family:'Libre Franklin',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn-calc-clear:hover{border-color:var(--red);color:var(--red);}
+.calc-not-found{font-size:12px;color:var(--red);margin-top:4px;min-height:14px;}
 .wk-total-card{background:var(--warm);border-radius:12px;padding:12px 10px;text-align:center;border:1px solid var(--border);}
 .wk-total-num{font-family:'Playfair Display',serif;font-size:24px;color:var(--navy);line-height:1;margin-bottom:3px;}
 .wk-total-lbl{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
@@ -301,6 +324,27 @@ main{max-width:900px;margin:0 auto;padding:20px 14px 60px;display:grid;gap:16px;
     </div>
     <div class="dl-card" id="pt-card">
       <div class="dl-stitle">&#129496; Daily PT Program</div>
+        <div class="dl-card">
+      <div class="dl-stitle">&#129514; Macro Calculator</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Type an ingredient + quantity, hit Add. When done, push totals to your log.</div>
+      <div class="macro-calc-row">
+        <input class="macro-calc-input" type="text" id="calc-ingredient" placeholder="e.g. chicken breast, chia seeds...">
+        <input class="macro-calc-qty" type="text" id="calc-qty" placeholder="6 oz">
+        <button class="btn-add-ingredient" id="btn-calc-add">Add</button>
+      </div>
+      <div class="calc-not-found" id="calc-not-found"></div>
+      <div class="calc-ingredient-list" id="calc-ingredient-list"></div>
+      <div class="calc-totals" id="calc-totals" style="display:none;">
+        <div class="calc-total-item"><div class="calc-total-val" id="calc-total-cal">0</div><div class="calc-total-lbl">Calories</div></div>
+        <div class="calc-total-item"><div class="calc-total-val" id="calc-total-pro">0g</div><div class="calc-total-lbl">Protein</div></div>
+        <div class="calc-total-item"><div class="calc-total-val" id="calc-total-carb">0g</div><div class="calc-total-lbl">Carbs</div></div>
+        <div class="calc-total-item"><div class="calc-total-val" id="calc-total-fiber">0g</div><div class="calc-total-lbl">Fiber</div></div>
+      </div>
+      <div class="calc-actions" id="calc-actions" style="display:none;">
+        <button class="btn-calc-use" id="btn-calc-use">&#8595; Use Protein &amp; Fiber</button>
+        <button class="btn-calc-clear" id="btn-calc-clear">Clear</button>
+      </div>
+    </div>
     <div class="dl-card">
       <div class="dl-stitle">&#129382; Nutrition</div>
       <div class="macro-row">
@@ -1073,6 +1117,247 @@ function generateReport(){
   lines.push('Generated by My Fitness Tracker on '+new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}));
   return lines.join('\n');
 }
+
+// ── MACRO CALCULATOR ──────────────────────────────────
+// Food database: [calories, protein_g, carbs_g, fiber_g, fat_g] per 100g unless noted
+// Entries include common units for matching
+const FOODS = {
+  // Proteins
+  'chicken breast':       [165, 31, 0, 0, 3.6],
+  'chicken thigh':        [209, 26, 0, 0, 11],
+  'ground beef 85':       [215, 26, 0, 0, 13],
+  'ground beef 90':       [176, 27, 0, 0, 7],
+  'ground turkey':        [170, 21, 0, 0, 9],
+  'salmon':               [208, 20, 0, 0, 13],
+  'tuna canned':          [109, 25, 0, 0, 1],
+  'shrimp':               [99,  24, 0.2, 0, 0.3],
+  'eggs':                 [155, 13, 1.1, 0, 11],
+  'egg whites':           [52,  11, 0.7, 0, 0.2],
+  'pork ribs':            [280, 20, 0, 0, 22],  // per 4oz serving stored
+  'bacon':                [417, 37, 1.4, 0, 42],
+  'turkey breast':        [135, 30, 0, 0, 1],
+  // Dairy
+  'greek yogurt':         [97,  9,  3.6, 0, 5],   // per 100g (~just under half cup)
+  'cottage cheese':       [98,  11, 3.4, 0, 4.3],
+  'feta cheese':          [264, 14, 4,   0, 21],
+  'parmesan':             [431, 38, 4,   0, 29],
+  'mozzarella':           [280, 28, 2.2, 0, 17],
+  'cheddar':              [403, 25, 1.3, 0, 33],
+  'milk whole':           [61,  3.2, 4.8, 0, 3.3],
+  'milk 2%':              [50,  3.4, 4.9, 0, 2],
+  'milk skim':            [35,  3.6, 5,  0, 0.2],
+  // Protein supplements
+  'protein powder':       [120, 25, 3,   0, 2],   // per scoop (~30g)
+  'collagen powder':      [35,  9,  0,   0, 0],   // per tbsp (~10g)
+  'creatine':             [0,   0,  0,   0, 0],
+  'whey protein':         [120, 25, 3,   0, 2],
+  // Seeds & nuts
+  'chia seeds':           [486, 17, 42, 34, 31],
+  'basil seeds':          [442, 15, 63, 54, 14],
+  'flax seeds':           [534, 18, 29, 27, 42],
+  'hemp seeds':           [553, 32, 8.7, 4, 49],
+  'almonds':              [579, 21, 22, 12.5, 50],
+  'walnuts':              [654, 15, 14, 6.7, 65],
+  'peanut butter':        [588, 25, 20, 6,  50],
+  'almond butter':        [614, 21, 19, 10, 56],
+  'sunflower seeds':      [584, 21, 20, 8.6, 51],
+  'pumpkin seeds':        [559, 30, 11, 6,  49],
+  // Fruits
+  'raspberries':          [52,  1.2, 12, 6.5, 0.7],
+  'blueberries':          [57,  0.7, 14, 2.4, 0.3],
+  'strawberries':         [32,  0.7, 7.7, 2,  0.3],
+  'banana':               [89,  1.1, 23, 2.6, 0.3],
+  'apple':                [52,  0.3, 14, 2.4, 0.2],
+  'orange':               [47,  0.9, 12, 2.4, 0.1],
+  'avocado':              [160, 2,  9,  6.7, 15],
+  'mango':                [60,  0.8, 15, 1.6, 0.4],
+  'grapes':               [67,  0.6, 17, 0.9, 0.4],
+  'peach':                [39,  0.9, 10, 1.5, 0.3],
+  'pineapple':            [50,  0.5, 13, 1.4, 0.1],
+  'cherry tomatoes':      [18,  0.9, 3.9, 1.2, 0.2],
+  'tomato':               [18,  0.9, 3.9, 1.2, 0.2],
+  // Vegetables
+  'bell pepper':          [31,  1,  6,  2.1, 0.3],
+  'cucumber':             [15,  0.7, 3.6, 0.5, 0.1],
+  'spinach':              [23,  2.9, 3.6, 2.2, 0.4],
+  'spring greens':        [20,  2,  3,  2,  0.4],
+  'mixed greens':         [20,  2,  3,  2,  0.4],
+  'romaine':              [17,  1.2, 3.3, 2.1, 0.3],
+  'broccoli':             [34,  2.8, 7,  2.6, 0.4],
+  'cauliflower':          [25,  1.9, 5,  2,  0.3],
+  'sweet potato':         [86,  1.6, 20, 3,  0.1],
+  'red potato':           [77,  2,  17, 1.8, 0.1],
+  'potato':               [77,  2,  17, 1.8, 0.1],
+  'rice white':           [130, 2.7, 28, 0.4, 0.3],
+  'rice brown':           [216, 5,  45, 3.5, 1.8],
+  'oats':                 [389, 17, 66, 10.6, 7],
+  'quinoa cooked':        [120, 4.4, 21, 2.8, 1.9],
+  'black beans':          [132, 8.9, 24, 8.7, 0.5],
+  'lentils cooked':       [116, 9,  20, 7.9, 0.4],
+  'chickpeas':            [164, 8.9, 27, 7.6, 2.6],
+  'edamame':              [121, 11, 8.9, 5.2, 5.2],
+  // Extras
+  'olive oil':            [884, 0,  0,  0,  100],
+  'caesar salad':         [170, 3,  8,  2,  14],
+  'caesar salad mix':     [170, 3,  8,  2,  14],
+  'konjac glucomannan':   [200, 0, 83, 83,  0],
+  'glucomannan':          [200, 0, 83, 83,  0],
+};
+
+// Unit conversion to grams
+function parseQtyToGrams(qtyStr, foodKey) {
+  const s = qtyStr.trim().toLowerCase();
+  // extract number (supports fractions like 1/2)
+  const numMatch = s.match(/^(\d+)\s*\/\s*(\d+)|^(\d*\.?\d+)/);
+  let num = 1;
+  if (numMatch) {
+    if (numMatch[1] && numMatch[2]) num = parseInt(numMatch[1]) / parseInt(numMatch[2]);
+    else if (numMatch[3]) num = parseFloat(numMatch[3]);
+  }
+  // detect unit
+  if (/tbsp|tablespoon|tbs|^t\b/.test(s))   return num * 15;
+  if (/tsp|teaspoon/.test(s))                return num * 5;
+  if (/\bcup\b|^c\b/.test(s))               return num * 240;
+  if (/\boz\b|ounce/.test(s))               return num * 28.35;
+  if (/\blb\b|pound/.test(s))               return num * 453.6;
+  if (/\bscoop\b/.test(s))                  return num * 30;
+  if (/\bg\b|gram/.test(s))                 return num;
+  if (/\bkg\b/.test(s))                     return num * 1000;
+  if (/\bserving\b/.test(s))                return num * 100;
+  if (/\bpiece\b|\bslice\b|\bmedium\b|\bmed\b|\blarge\b|\bsmall\b/.test(s)) return num * 100;
+  // bare number — assume grams
+  return num;
+}
+
+// Fuzzy food lookup
+function lookupFood(name) {
+  const n = name.trim().toLowerCase();
+  // exact match
+  if (FOODS[n]) return { key: n, data: FOODS[n] };
+  // starts with
+  for (const k of Object.keys(FOODS)) {
+    if (k.startsWith(n) || n.startsWith(k)) return { key: k, data: FOODS[k] };
+  }
+  // contains all words
+  const words = n.split(/\s+/);
+  for (const k of Object.keys(FOODS)) {
+    if (words.every(w => k.includes(w))) return { key: k, data: FOODS[k] };
+  }
+  // any word match
+  for (const k of Object.keys(FOODS)) {
+    if (words.some(w => w.length > 3 && k.includes(w))) return { key: k, data: FOODS[k] };
+  }
+  return null;
+}
+
+let calcItems = [];
+
+function calcMacrosForItem(foodData, grams) {
+  const factor = grams / 100;
+  return {
+    cal:   Math.round(foodData[0] * factor),
+    pro:   Math.round(foodData[1] * factor * 10) / 10,
+    carb:  Math.round(foodData[2] * factor * 10) / 10,
+    fiber: Math.round(foodData[3] * factor * 10) / 10,
+    fat:   Math.round(foodData[4] * factor * 10) / 10,
+  };
+}
+
+function renderCalcList() {
+  const list = document.getElementById('calc-ingredient-list');
+  const totalsEl = document.getElementById('calc-totals');
+  const actionsEl = document.getElementById('calc-actions');
+  if (!list) return;
+  list.innerHTML = '';
+  if (calcItems.length === 0) {
+    totalsEl.style.display = 'none';
+    actionsEl.style.display = 'none';
+    return;
+  }
+  let totCal=0, totPro=0, totCarb=0, totFiber=0;
+  calcItems.forEach((item, i) => {
+    totCal += item.macros.cal;
+    totPro += item.macros.pro;
+    totCarb += item.macros.carb;
+    totFiber += item.macros.fiber;
+    const row = document.createElement('div');
+    row.className = 'calc-ingredient-row';
+    row.innerHTML = '<span class="calc-ingredient-name">' + item.display + '</span>' +
+      '<span class="calc-ingredient-macros">' +
+        item.macros.cal + ' cal &nbsp;|&nbsp; ' +
+        item.macros.pro + 'g pro &nbsp;|&nbsp; ' +
+        item.macros.fiber + 'g fiber' +
+      '</span>' +
+      '<button class="calc-ingredient-remove" data-idx="' + i + '">&#10005;</button>';
+    list.appendChild(row);
+  });
+  list.querySelectorAll('.calc-ingredient-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      calcItems.splice(parseInt(btn.dataset.idx), 1);
+      renderCalcList();
+    });
+  });
+  totalsEl.style.display = '';
+  actionsEl.style.display = '';
+  document.getElementById('calc-total-cal').textContent = totCal;
+  document.getElementById('calc-total-pro').textContent = Math.round(totPro * 10) / 10 + 'g';
+  document.getElementById('calc-total-carb').textContent = Math.round(totCarb * 10) / 10 + 'g';
+  document.getElementById('calc-total-fiber').textContent = Math.round(totFiber * 10) / 10 + 'g';
+}
+
+function addCalcIngredient() {
+  const nameEl = document.getElementById('calc-ingredient');
+  const qtyEl = document.getElementById('calc-qty');
+  const notFound = document.getElementById('calc-not-found');
+  const name = nameEl.value.trim();
+  const qty = qtyEl.value.trim() || '100g';
+  if (!name) return;
+  const match = lookupFood(name);
+  if (!match) {
+    notFound.textContent = 'Could not find "' + name + '" — try a simpler name';
+    return;
+  }
+  notFound.textContent = '';
+  const grams = parseQtyToGrams(qty, match.key);
+  const macros = calcMacrosForItem(match.data, grams);
+  calcItems.push({ display: qty + ' ' + match.key, macros });
+  nameEl.value = '';
+  qtyEl.value = '';
+  nameEl.focus();
+  renderCalcList();
+}
+
+document.getElementById('btn-calc-add').addEventListener('click', addCalcIngredient);
+document.getElementById('calc-ingredient').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const qtyEl = document.getElementById('calc-qty');
+    if (!qtyEl.value.trim()) qtyEl.focus();
+    else addCalcIngredient();
+  }
+});
+document.getElementById('calc-qty').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addCalcIngredient(); }
+});
+document.getElementById('btn-calc-use').addEventListener('click', () => {
+  let totPro = 0, totFiber = 0;
+  calcItems.forEach(item => { totPro += item.macros.pro; totFiber += item.macros.fiber; });
+  const proEl = document.getElementById('dl-protein');
+  const fibEl = document.getElementById('dl-fiber');
+  if (proEl) proEl.value = Math.round(totPro * 10) / 10;
+  if (fibEl) fibEl.value = Math.round(totFiber * 10) / 10;
+  // Flash the fields
+  [proEl, fibEl].forEach(el => {
+    if (!el) return;
+    el.style.borderColor = 'var(--green-dark)';
+    setTimeout(() => el.style.borderColor = '', 1500);
+  });
+});
+document.getElementById('btn-calc-clear').addEventListener('click', () => {
+  calcItems = [];
+  renderCalcList();
+  document.getElementById('calc-not-found').textContent = '';
+});
 
 function checkDailyLog(){const rec=getDayRec(todayStr());if(!rec.savedAt)openLog(todayStr());renderTodaySummary();renderStatusBar();}
 
