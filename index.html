@@ -1164,7 +1164,7 @@ function navTo(tab){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
   document.getElementById('week-bar-el').style.display=tab==='weekly'?'':'none';
-  if(tab==='weekly'){renderChart();renderWeeklyTotals();}
+  if(tab==='weekly'){renderWeekDays();renderWeekStats();renderWeekNotes();renderWeeklyTotals();renderWeeklyWeight();renderAllTimeStats();renderChart();}
 }
 function closeDailyAndNavTo(tab){
   document.getElementById('daily-overlay').classList.remove('visible');
