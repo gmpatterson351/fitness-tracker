@@ -717,21 +717,20 @@ async function pullFromSheets(){
   if(!SHEET_URL)return false;
   setSyncStatus('syncing','Connecting...');
   try{
-    const controller=new AbortController();
-    const timeout=setTimeout(()=>controller.abort(),10000);
+    // Use Promise.race for timeout — avoids AbortSignal cloning issues on mobile
+    const fetchPromise=fetch(SHEET_URL+'?action=read&key='+encodeURIComponent(SECRET_KEY),{redirect:'follow'});
+    const timeoutPromise=new Promise((_,reject)=>setTimeout(()=>reject(new Error('TIMEOUT')),10000));
     let res;
     try{
-      res=await fetch(SHEET_URL+'?action=read&key='+encodeURIComponent(SECRET_KEY),{redirect:'follow',signal:controller.signal});
+      res=await Promise.race([fetchPromise,timeoutPromise]);
     }catch(fe){
-      clearTimeout(timeout);
-      if(fe.name==='AbortError'){
-        setSyncStatus('error','Timed out after 10s — check your Web App URL and that access is set to Anyone');
+      if(fe.message==='TIMEOUT'){
+        setSyncStatus('error','Timed out — check your Web App URL and that access is set to Anyone');
       }else{
         setSyncStatus('error','Network error: '+fe.message);
       }
       return false;
     }
-    clearTimeout(timeout);
     const text=await res.text();
     let json;
     try{json=JSON.parse(text);}catch(pe){
@@ -763,8 +762,8 @@ async function pullFromSheets(){
 }
 function schedulePush(){if(syncTimer)clearTimeout(syncTimer);syncTimer=setTimeout(pushToSheets,2500);}
 
-document.getElementById('setup-help-toggle').addEventListener('click',()=>{const el=document.getElementById('setup-instructions');el.style.display=el.style.display==='none'?'block':'none';});
-document.getElementById('setup-btn').addEventListener('click',async()=>{
+document.getElementById('setup-help-toggle')?.addEventListener('click',()=>{const el=document.getElementById('setup-instructions');el.style.display=el.style.display==='none'?'block':'none';});
+document.getElementById('setup-btn')?.addEventListener('click',async()=>{
   const url=document.getElementById('setup-url').value.trim();
   const key=document.getElementById('setup-key').value.trim();
   const err=document.getElementById('setup-err');
@@ -899,16 +898,16 @@ function saveLog(){
   if(document.getElementById('tab-weekly').classList.contains('active')){renderWeekDays();renderWeekStats();renderWeeklyTotals();renderAllTimeStats();}
 }
 
-document.getElementById('dl-pain-slider').addEventListener('input',e=>setPain('dl-pain-val',e.target.value));
+document.getElementById('dl-pain-slider')?.addEventListener('input',e=>setPain('dl-pain-val',e.target.value));
 
-document.getElementById('btn-save-daily').addEventListener('click',saveLog);
-document.getElementById('btn-skip').addEventListener('click',()=>{
+document.getElementById('btn-save-daily')?.addEventListener('click',saveLog);
+document.getElementById('btn-skip')?.addEventListener('click',()=>{
   if(viewingDate===todayStr()){const rec=getDayRec(viewingDate);rec.savedAt=rec.savedAt||Date.now();dailyData[viewingDate]=rec;saveLocal();schedulePush();renderTodaySummary();}
   document.getElementById('daily-overlay').classList.remove('visible');
 });
-document.getElementById('dl-prev').addEventListener('click',()=>{const d=new Date(viewingDate+'T12:00:00');d.setDate(d.getDate()-1);const lim=new Date();lim.setDate(lim.getDate()-30);if(d>=lim)openLog(d.toISOString().split('T')[0]);});
-document.getElementById('dl-next').addEventListener('click',()=>{if(viewingDate>=todayStr())return;const d=new Date(viewingDate+'T12:00:00');d.setDate(d.getDate()+1);openLog(d.toISOString().split('T')[0]);});
-document.getElementById('btn-open-log').addEventListener('click',()=>openLog(todayStr()));
+document.getElementById('dl-prev')?.addEventListener('click',()=>{const d=new Date(viewingDate+'T12:00:00');d.setDate(d.getDate()-1);const lim=new Date();lim.setDate(lim.getDate()-30);if(d>=lim)openLog(d.toISOString().split('T')[0]);});
+document.getElementById('dl-next')?.addEventListener('click',()=>{if(viewingDate>=todayStr())return;const d=new Date(viewingDate+'T12:00:00');d.setDate(d.getDate()+1);openLog(d.toISOString().split('T')[0]);});
+document.getElementById('btn-open-log')?.addEventListener('click',()=>openLog(todayStr()));
 
 function renderTodaySummary(){
   const today=todayStr();const rec=getDayRec(today);const idx=todayIdx();
@@ -1195,25 +1194,25 @@ function openDayPicker(){
   document.getElementById('day-picker-modal').classList.add('visible');
 }
 // Close day picker on backdrop click
-document.getElementById('day-picker-modal').addEventListener('click',e=>{
+document.getElementById('day-picker-modal')?.addEventListener('click',e=>{
   if(e.target===document.getElementById('day-picker-modal'))
     document.getElementById('day-picker-modal').classList.remove('visible');
 });
 
-document.getElementById('prev-week').addEventListener('click',()=>{currentWeekKey=offsetWeek(currentWeekKey,-1);renderAll();});
-document.getElementById('next-week').addEventListener('click',()=>{currentWeekKey=offsetWeek(currentWeekKey,1);renderAll();});
-document.getElementById('btn-save-week').addEventListener('click',saveWeekNotes);
-document.getElementById('btn-clear').addEventListener('click',()=>{if(confirm("Clear this week's notes and measurements?")){delete weekData[currentWeekKey];saveLocal();schedulePush();renderAll();}});
-document.getElementById('btn-report').addEventListener('click',()=>{
+document.getElementById('prev-week')?.addEventListener('click',()=>{currentWeekKey=offsetWeek(currentWeekKey,-1);renderAll();});
+document.getElementById('next-week')?.addEventListener('click',()=>{currentWeekKey=offsetWeek(currentWeekKey,1);renderAll();});
+document.getElementById('btn-save-week')?.addEventListener('click',saveWeekNotes);
+document.getElementById('btn-clear')?.addEventListener('click',()=>{if(confirm("Clear this week's notes and measurements?")){delete weekData[currentWeekKey];saveLocal();schedulePush();renderAll();}});
+document.getElementById('btn-report')?.addEventListener('click',()=>{
   const text = generateReport();
   document.getElementById('report-text').value = text;
   const modal = document.getElementById('report-modal');
   modal.style.display = 'flex';
 });
-document.getElementById('btn-close-report').addEventListener('click',()=>{
+document.getElementById('btn-close-report')?.addEventListener('click',()=>{
   document.getElementById('report-modal').style.display='none';
 });
-document.getElementById('btn-copy-report').addEventListener('click',()=>{
+document.getElementById('btn-copy-report')?.addEventListener('click',()=>{
   const ta = document.getElementById('report-text');
   ta.select();
   document.execCommand('copy');
@@ -1221,7 +1220,7 @@ document.getElementById('btn-copy-report').addEventListener('click',()=>{
   confirm.textContent = '✓ Copied to clipboard!';
   setTimeout(()=>confirm.textContent='', 2500);
 });
-document.getElementById('btn-gdocs-report').addEventListener('click',()=>{
+document.getElementById('btn-gdocs-report')?.addEventListener('click',()=>{
   const text = document.getElementById('report-text').value;
   const encoded = encodeURIComponent(text);
   // Open Google Docs new document — user will paste
@@ -1234,17 +1233,11 @@ document.getElementById('btn-gdocs-report').addEventListener('click',()=>{
   confirm.textContent = '✓ Copied! Paste into the new Google Doc with Ctrl+V (or Cmd+V)';
   setTimeout(()=>confirm.textContent='', 6000);
 });
-document.getElementById('report-modal').addEventListener('click',e=>{
+document.getElementById('report-modal')?.addEventListener('click',e=>{
   if(e.target===document.getElementById('report-modal'))document.getElementById('report-modal').style.display='none';
 });
-document.getElementById('wk-pain-slider').addEventListener('input',e=>setPain('wk-pain-val',e.target.value));
+document.getElementById('wk-pain-slider')?.addEventListener('input',e=>setPain('wk-pain-val',e.target.value));
 window.addEventListener('resize',renderChart);
-
-function renderAll(){
-  document.getElementById('week-label').textContent=getWeekLabel(currentWeekKey);
-  renderWeekDays();renderWeekStats();renderWeekNotes();renderWeeklyTotals();renderWeeklyWeight();renderAllTimeStats();renderTodaySummary();
-  const today=new Date();document.getElementById('sunday-banner').style.display=(today.getDay()===0&&currentWeekKey===getWeekKey(today))?'flex':'none';
-}
 function updateWaterProgress(){
   let done=0;
   for(let i=0;i<8;i++){const cb=document.getElementById('wc-'+i);if(cb&&cb.checked)done++;}
@@ -1576,8 +1569,8 @@ function addCalcIngredient() {
   renderCalcList();
 }
 
-document.getElementById('btn-calc-add').addEventListener('click', addCalcIngredient);
-document.getElementById('calc-ingredient').addEventListener('keydown', e => {
+document.getElementById('btn-calc-add')?.addEventListener('click', addCalcIngredient);
+document.getElementById('calc-ingredient')?.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
     e.preventDefault();
     const qtyEl = document.getElementById('calc-qty');
@@ -1585,10 +1578,10 @@ document.getElementById('calc-ingredient').addEventListener('keydown', e => {
     else addCalcIngredient();
   }
 });
-document.getElementById('calc-qty').addEventListener('keydown', e => {
+document.getElementById('calc-qty')?.addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); addCalcIngredient(); }
 });
-document.getElementById('btn-calc-use').addEventListener('click', () => {
+document.getElementById('btn-calc-use')?.addEventListener('click', () => {
   let totCal=0, totPro=0, totFiber=0;
   calcItems.forEach(item => { totCal+=item.macros.cal; totPro+=item.macros.pro; totFiber+=item.macros.fiber; });
   const meal = document.getElementById('calc-meal-target').value;
@@ -1606,7 +1599,7 @@ document.getElementById('btn-calc-use').addEventListener('click', () => {
   });
   updateMealTotals();
 });
-document.getElementById('btn-calc-clear').addEventListener('click', () => {
+document.getElementById('btn-calc-clear')?.addEventListener('click', () => {
   calcItems = [];
   renderCalcList();
   document.getElementById('calc-not-found').textContent = '';
@@ -1657,8 +1650,8 @@ function initMorning(){
   document.getElementById('morning-date-lbl').textContent=DN[now.getDay()]+', '+MN[now.getMonth()]+' '+now.getDate();
   document.getElementById('morning-overlay').classList.remove('hidden');
   updateMorningClock();morningInterval=setInterval(updateMorningClock,15000);
-  document.getElementById('mo-water').addEventListener('change',updateMorningClock);
-  document.getElementById('btn-morning-go').addEventListener('click',()=>{
+document.getElementById('mo-water')?.addEventListener('change',updateMorningClock);
+document.getElementById('btn-morning-go')?.addEventListener('click',()=>{
     localStorage.setItem(key,'1');
     const rec=getDayRec(todayStr());rec.morningWater=true;dailyData[todayStr()]=rec;saveLocal();schedulePush();
     clearInterval(morningInterval);document.getElementById('morning-overlay').classList.add('hidden');openLog(todayStr());
