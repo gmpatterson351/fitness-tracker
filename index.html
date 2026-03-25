@@ -167,6 +167,28 @@ header h1{font-family:'Playfair Display',serif;font-size:clamp(20px,4vw,30px);co
 .tab-btn{padding:7px 14px;border-radius:7px;border:none;background:transparent;color:rgba(255,255,255,0.5);font-family:'Libre Franklin',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;}
 .tab-btn.active{background:var(--accent);color:#fff;}
 .tab-btn:hover:not(.active){color:#fff;}
+.main-nav{display:flex;background:rgba(0,0,0,0.25);border-top:1px solid rgba(255,255,255,0.07);}
+.nav-btn{flex:1;padding:11px 8px;border:none;background:transparent;color:rgba(255,255,255,0.55);font-family:'Libre Franklin',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;letter-spacing:0.3px;border-bottom:3px solid transparent;}
+.nav-btn:hover{color:#fff;background:rgba(255,255,255,0.06);}
+.nav-btn.active{color:#fff;border-bottom-color:var(--accent);background:rgba(74,158,255,0.1);}
+/* Day picker modal */
+.day-picker-modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:2000;display:none;align-items:flex-end;justify-content:center;}
+.day-picker-modal.visible{display:flex;}
+.day-picker-sheet{background:var(--card);border-radius:20px 20px 0 0;padding:20px 16px 40px;max-width:500px;width:100%;max-height:70vh;overflow-y:auto;}
+.day-picker-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.day-picker-close{background:var(--warm);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:14px;color:var(--muted);}
+.day-picker-list{display:flex;flex-direction:column;gap:6px;}
+.day-picker-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:12px;background:var(--warm);cursor:pointer;border:1.5px solid transparent;transition:all 0.15s;}
+.day-picker-item:hover{border-color:var(--accent);}
+.day-picker-item.logged{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-color:#4caf50;}
+.day-picker-item.today-item{border-color:var(--accent);background:rgba(74,158,255,0.07);}
+.day-picker-date{font-size:14px;font-weight:600;color:var(--text);}
+.day-picker-status{font-size:11px;color:var(--muted);}
+.day-picker-item.logged .day-picker-status{color:var(--green-dark);}
+/* Nav inside daily overlay */
+.daily-overlay-nav{display:flex;background:var(--blue);border-top:1px solid rgba(255,255,255,0.08);}
+.daily-overlay-nav .nav-btn{color:rgba(255,255,255,0.5);}
+.daily-overlay-nav .nav-btn.active{color:#fff;border-bottom-color:var(--accent);}
 .week-bar{background:var(--blue);padding:9px 20px;}
 .week-bar-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;}
 .week-nav{display:flex;align-items:center;gap:8px;}
@@ -289,6 +311,11 @@ main{max-width:900px;margin:0 auto;padding:20px 14px 60px;display:grid;gap:16px;
         </div>
         <button class="btn-skip" id="btn-skip">Skip</button>
       </div>
+    </div>
+    <div class="daily-overlay-nav">
+      <button class="nav-btn" id="nav-dl-today">&#128197; Today</button>
+      <button class="nav-btn" id="nav-btn-prev">&#8592; Past Days</button>
+      <button class="nav-btn" id="nav-dl-weekly">&#128200; This Week</button>
     </div>
 
     <div class="dl-card">
@@ -481,11 +508,12 @@ main{max-width:900px;margin:0 auto;padding:20px 14px 60px;display:grid;gap:16px;
 <header>
   <div class="header-orb"></div>
   <div class="header-inner">
-    <div><div class="header-lbl">Fitness Tracker</div><h1>My Fitness Journey</h1></div>
-    <div class="tab-bar">
-      <button class="tab-btn active" data-tab="today">Today</button>
-      <button class="tab-btn" data-tab="weekly">This Week</button>
-    </div>
+    <div><div class="header-lbl">Fitness Tracker</div><h1>My Fitness <em>Journey</em></h1></div>
+  </div>
+  <div class="main-nav" id="main-nav">
+    <button class="nav-btn active" id="nav-today" id="nav-btn-today">&#128197; Today</button>
+    <button class="nav-btn" id="nav-prev" id="nav-btn-prev">&#8592; Past Days</button>
+    <button class="nav-btn" id="nav-weekly" id="nav-btn-weekly">&#128200; This Week</button>
   </div>
 </header>
 <div class="week-bar" id="week-bar-el" style="display:none">
@@ -552,7 +580,7 @@ main{max-width:900px;margin:0 auto;padding:20px 14px 60px;display:grid;gap:16px;
       <div class="metrics-row">
         <div class="metric-card"><div class="metric-label">This Week (lowest)</div><div class="metric-wrap"><div class="metric-input" id="wk-weight" style="font-family:'Playfair Display',serif;font-size:30px;color:var(--navy);border-bottom:2px solid var(--border);padding-bottom:3px;min-width:80px;">-</div><span class="metric-unit">lbs</span></div><div class="metric-delta" id="wk-delta"></div></div>
         <div class="metric-card"><div class="metric-label">Lost This Week</div><div class="metric-wrap"><div class="metric-input" id="wk-lost-week" style="font-family:'Playfair Display',serif;font-size:30px;color:var(--navy);border-bottom:2px solid var(--border);padding-bottom:3px;min-width:80px;">-</div><span class="metric-unit">lbs</span></div><div class="metric-delta" id="wk-delta-lbl" style="font-size:11px;color:var(--muted);"></div></div>
-        <div class="metric-card"><div class="metric-label">Starting (1/17/26)</div><div class="metric-wrap"><div class="metric-input" style="font-family:'Playfair Display',serif;font-size:30px;color:var(--muted);border-bottom:2px solid var(--border);padding-bottom:3px;min-width:80px;">201.2</div><span class="metric-unit">lbs</span></div><div class="metric-delta" id="wk-total-delta"></div></div>
+        <div class="metric-card"><div class="metric-label">Starting (3/24/26)</div><div class="metric-wrap"><div class="metric-input" style="font-family:'Playfair Display',serif;font-size:30px;color:var(--muted);border-bottom:2px solid var(--border);padding-bottom:3px;min-width:80px;">198.2</div><span class="metric-unit">lbs</span></div><div class="metric-delta" id="wk-total-delta"></div></div>
       </div>
     </div>
 
@@ -712,10 +740,16 @@ async function pullFromSheets(){
       return false;
     }
     if(json.success&&json.data){
-      const lt=dailyData[todayStr()];
-      weekData=Object.assign({},json.data.weekly||{},weekData);
-      dailyData=Object.assign({},json.data.daily||{},dailyData);
-      if(lt)dailyData[todayStr()]=lt;
+      // Sheet wins for all past days. Local only wins for today if it has a savedAt.
+      const cloudWeekly=json.data.weekly||{};
+      const cloudDaily=json.data.daily||{};
+      const today=todayStr();
+      const localToday=dailyData[today];
+      // Start from cloud data as the source of truth
+      weekData=Object.assign({},cloudWeekly);
+      dailyData=Object.assign({},cloudDaily);
+      // Only keep local today if it was actually saved (has savedAt)
+      if(localToday&&localToday.savedAt)dailyData[today]=localToday;
       saveLocal();setSyncStatus('synced','Loaded from Google Sheets');return true;
     }else if(json.success){
       setSyncStatus('synced','Connected — no data yet');return true;
@@ -818,6 +852,8 @@ function openLog(dateStr){
   updatePTProgress();
 
   document.getElementById('daily-overlay').classList.add('visible');
+  // Keep main nav active state meaningful — daily log is its own layer
+
 }
 
 function saveLog(){
@@ -1031,7 +1067,7 @@ function renderWeeklyWeight(){
       if (!isNaN(w) && (prevLowest === null || w < prevLowest)) prevLowest = w;
     }
   });
-  const startW = 201.2;
+  const startW = 198.2;
   const wkWeightEl = document.getElementById('wk-weight');
   const lostWeekEl = document.getElementById('wk-lost-week');
   const totalDeltaEl = document.getElementById('wk-total-delta');
@@ -1117,7 +1153,53 @@ function renderChart(){
 }
 function setPain(id,val){const el=document.getElementById(id);el.textContent=val;el.style.color=PC[val]||'var(--navy)';}
 
-document.querySelectorAll('.tab-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');const tab=btn.dataset.tab;document.getElementById('tab-'+tab).classList.add('active');document.getElementById('week-bar-el').style.display=tab==='weekly'?'':'none';if(tab==='weekly')renderChart();});});
+function navTo(tab){
+  // Close daily overlay if open
+  document.getElementById('daily-overlay').classList.remove('visible');
+  document.getElementById('day-picker-modal').classList.remove('visible');
+  // Update nav buttons
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const activeBtn=document.getElementById('nav-'+tab);
+  if(activeBtn)activeBtn.classList.add('active');
+  // Show correct panel
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('week-bar-el').style.display=tab==='weekly'?'':'none';
+  if(tab==='weekly'){renderChart();renderWeeklyTotals();}
+}
+function closeDailyAndNavTo(tab){
+  document.getElementById('daily-overlay').classList.remove('visible');
+  navTo(tab);
+}
+function openDayPicker(){
+  // Build list of last 30 days
+  const list=document.getElementById('day-picker-list');
+  list.innerHTML='';
+  const today=todayStr();
+  for(let i=0;i<30;i++){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const rec=getDayRec(ds);
+    const isToday=ds===today;
+    const item=document.createElement('div');
+    item.className='day-picker-item'+(rec.savedAt?' logged':'')+(isToday?' today-item':'');
+    const dayName=d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+    const status=isToday?'Today':rec.savedAt?'Logged':'Not logged';
+    item.innerHTML='<span class="day-picker-date">'+dayName+'</span><span class="day-picker-status">'+status+'</span>';
+    item.addEventListener('click',()=>{
+      document.getElementById('day-picker-modal').classList.remove('visible');
+      openLog(ds);
+    });
+    list.appendChild(item);
+  }
+  document.getElementById('day-picker-modal').classList.add('visible');
+}
+// Close day picker on backdrop click
+document.getElementById('day-picker-modal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('day-picker-modal'))
+    document.getElementById('day-picker-modal').classList.remove('visible');
+});
+
 document.getElementById('prev-week').addEventListener('click',()=>{currentWeekKey=offsetWeek(currentWeekKey,-1);renderAll();});
 document.getElementById('next-week').addEventListener('click',()=>{currentWeekKey=offsetWeek(currentWeekKey,1);renderAll();});
 document.getElementById('btn-save-week').addEventListener('click',saveWeekNotes);
@@ -1228,7 +1310,7 @@ function generateReport(){
   const avgProtein=proteinCount>0?Math.round(totalProtein/proteinCount)+'g':'-';
   const avgFiber=fiberCount>0?Math.round(totalFiber/fiberCount)+'g':'-';
   const avgPain=painCount>0?(totalPain/painCount).toFixed(1)+'/10':'-';
-  const startW=201.2;
+  const startW=198.2;
   // Compute lowest weight this week from daily logs
   let lowestW=null;
   dates.forEach(ds=>{const rec=getDayRec(ds);if(rec.weight){const w=parseFloat(rec.weight);if(!isNaN(w)&&(lowestW===null||w<lowestW))lowestW=w;}});
@@ -1262,7 +1344,7 @@ function generateReport(){
   lines.push('Avg Pain:        '+avgPain+(painCount>0?' ('+PW[Math.round(totalPain/painCount)]+')':''));
   lines.push('Avg Weight:      '+avgWeightRpt);
   lines.push('Lowest Weight:   '+curWeight);
-  lines.push('Total Lost:      '+totalLostRpt+' (since 201.2 on 1/17/26)');
+  lines.push('Total Lost:      '+totalLostRpt+' (since 198.2 on 3/24/26)');
   lines.push('Avg Protein:      '+avgProtein);
   lines.push('Avg Fiber:        '+avgFiber);
   lines.push('');
@@ -1583,6 +1665,12 @@ function initMorning(){
   });
 }
 
+// Wire nav buttons
+['nav-btn-today','nav-dl-today'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('click',()=>navTo('today'));});
+['nav-btn-prev','nav-dl-prev'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('click',openDayPicker);});
+['nav-btn-weekly','nav-dl-weekly'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('click',()=>navTo('weekly'));});
+const dpClose=document.getElementById('day-picker-close');if(dpClose)dpClose.addEventListener('click',()=>document.getElementById('day-picker-modal').classList.remove('visible'));
+
 loadLocal();
 currentWeekKey=getWeekKey(new Date());
 if(SHEET_URL){
@@ -1592,5 +1680,16 @@ if(SHEET_URL){
   document.getElementById('setup-screen').classList.remove('hidden');
 }
 </script>
+<!-- Day Picker Modal -->
+<div class="day-picker-modal" id="day-picker-modal">
+  <div class="day-picker-sheet">
+    <div class="day-picker-title">
+      Previous Days
+      <button class="day-picker-close" id="day-picker-close">&#10005;</button>
+    </div>
+    <div class="day-picker-list" id="day-picker-list"></div>
+  </div>
+</div>
+
 </body>
 </html>
